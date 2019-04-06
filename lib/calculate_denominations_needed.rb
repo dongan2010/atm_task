@@ -10,7 +10,7 @@ class CalculateDenominationsNeeded
 
   private
 
-  # spread out value_to_cash_out for base and reminder for all dennominations(for 50 denomination  155 = base(50*3) + reminder(5))
+  # spread out value_to_cash_out for base and reminder for all denominations(for 50 denomination  155 = base(50*3) + reminder(5))
   # then do the same thing with reminder
   # untill we find result
   def spread_out(value_to_cash_out, is_first_level_call = true)
@@ -50,7 +50,11 @@ class CalculateDenominationsNeeded
       return result if is_result_valid?(result, value_to_cash_out)
     end
 
-    raise AtmTaskErrors::ImpossibleToCashOutError if is_first_level_call
+    if is_first_level_call
+      raise AtmTaskErrors::ImpossibleToCashOutError
+    else
+      {}
+    end
   end
 
   def update_available_banknotes_copy_info(denomination, banknotes_count)

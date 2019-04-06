@@ -5,7 +5,7 @@ class Api::V1::CashOutController < ApplicationController
   def create
     payload = ::CreateCashOut.new.call(strong_params[:amount])
     render :json => payload, :status => 201
-  rescue
+  rescue AtmTaskErrors::ImpossibleToCashOutError
     payload = { error: "Impossible give this amount of money" }
     render json: payload, status: :bad_request
   end
