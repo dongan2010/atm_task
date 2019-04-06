@@ -4,6 +4,7 @@ class Api::V1::ReplenishesController < ApplicationController
 
   def create
     ::Replenish.new.call(strong_params.to_h)
+    head :ok
   end
 
   private
