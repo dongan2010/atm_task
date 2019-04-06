@@ -13,11 +13,11 @@ class CalculateDenominationsNeeded
   # spread out value_to_cash_out for base and reminder for all dennominations(for 50 denomination  155 = base(50*3) + reminder(5))
   # then do the same thing with reminder
   # untill we find result
-  def spread_out(value_to_cash_out, is_data_reset_allowed = true)
+  def spread_out(value_to_cash_out, is_first_level_call = true)
     return {} if (value_to_cash_out == 0)
 
     denominations_not_bigger_then(value_to_cash_out).each do |denomination|
-      @available_banknotes_info_copy = available_banknotes_info.clone if is_data_reset_allowed
+      @available_banknotes_info_copy = available_banknotes_info.clone if is_first_level_call
       result = {}
       
       if is_banknotes_enough_inside_atm(denomination, value_to_cash_out / denomination)
@@ -50,8 +50,7 @@ class CalculateDenominationsNeeded
       return result if is_result_valid?(result, value_to_cash_out)
     end
 
-
-    return {}
+    raise AtmTaskErrors::ImpossibleToCashOutError if is_first_level_call
   end
 
   def update_available_banknotes_copy_info(denomination, banknotes_count)
