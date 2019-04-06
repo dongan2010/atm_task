@@ -10,6 +10,9 @@ class CalculateDenominationsNeeded
 
   private
 
+  # spread out value_to_cash_out for base and reminder for all dennominations(for 50 denomination  155 = base(50*3) + reminder(5))
+  # then do the same thing with reminder
+  # untill we find result
   def spread_out(value_to_cash_out, is_data_reset_allowed = true)
     return {} if (value_to_cash_out == 0)
 
@@ -18,36 +21,42 @@ class CalculateDenominationsNeeded
       result = {}
       
       if is_banknotes_enough_inside_atm(denomination, value_to_cash_out / denomination)
-        base = { denomination => value_to_cash_out / denomination }
-        @available_banknotes_info_copy[denomination] = @available_banknotes_info_copy[denomination] - (value_to_cash_out / denomination)
-        @available_banknotes_info_copy.reject! { |k,v| v == 0 }
+        banknotes_count = value_to_cash_out / denomination
 
-        
+        # caalculate base
+        base = { denomination => banknotes_count }
+        update_available_banknotes_copy_info(denomination, -banknotes_count)
+
+        # caalculate reminder
         remainder = spread_out(value_to_cash_out % denomination, false)
-        
+
+        # merge them
         result = base.merge(remainder)
       elsif @available_banknotes_info_copy[denomination]
-        available_denominations_count = @available_banknotes_info_copy[denomination]
+        banknotes_count = @available_banknotes_info_copy[denomination]
 
-        base = { denomination => available_denominations_count }
-        @available_banknotes_info_copy[denomination] = @available_banknotes_info_copy[denomination] - available_denominations_count
-        @available_banknotes_info_copy.reject! { |k,v| v == 0 }
+        # caalculate base
+        base = { denomination => banknotes_count }
+        update_available_banknotes_copy_info(denomination, -banknotes_count)
 
-        rest = value_to_cash_out - available_denominations_count * denomination
-        
+        # caalculate reminder
+        rest = value_to_cash_out - banknotes_count * denomination
         remainder = spread_out(rest, false)
-        
+
+        # merge them
         result = base.merge(remainder)
       end
 
-      if is_result_valid?(result, value_to_cash_out)
-        return result
-      else
-      end
+      return result if is_result_valid?(result, value_to_cash_out)
     end
 
 
     return {}
+  end
+
+  def update_available_banknotes_copy_info(denomination, banknotes_count)
+    @available_banknotes_info_copy[denomination] = @available_banknotes_info_copy[denomination] + banknotes_count
+    @available_banknotes_info_copy.reject! { |k,v| v == 0 }
   end
 
   def all_denominations
